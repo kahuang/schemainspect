@@ -1,13 +1,13 @@
 [tool.poetry]
-name = "schemainspect"
-version = "0.1"
-authors = [ "Robert Lechte <robertlechte@gmail.com>",]
+name = "schemainspect_idempotent"
+version = "0.2"
+authors = [ "Andrew Huang <k.andrew.huang@gmail.com>",]
 license = "Unlicense"
 readme = "README.md"
 description = "Schema inspection for PostgreSQL (and possibly others)"
 
-repository = "https://github.com/djrobstep/schemainspect"
-homepage = "https://github.com/djrobstep/schemainspect"
+repository = "https://github.com/kahuang/schemainspect"
+homepage = "https://github.com/kahuang/schemainspect"
 
 [tool.poetry.dependencies]
 python = "*"

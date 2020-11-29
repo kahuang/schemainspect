@@ -13,10 +13,10 @@ from ..inspected import TableRelated
 from ..inspector import DBInspector
 from ..misc import quoted_identifier, resource_text
 
-CREATE_TABLE = """create {}table {} ({}
+CREATE_TABLE = """create {}table if not exists {} ({}
 ){}{};
 """
-CREATE_TABLE_SUBCLASS = """create {}table {} partition of {} {};
+CREATE_TABLE_SUBCLASS = """create {}table if not exists {} partition of {} {};
 """
 CREATE_FUNCTION_FORMAT = """create or replace function {signature}
 returns {result_string} as
@@ -131,7 +131,7 @@ class InspectedSelectable(BaseInspectedSelectable):
     def drop_statement(self):
         n = self.quoted_full_name
         if self.relationtype in ("r", "p"):
-            drop_statement = "drop table {};".format(n)
+            drop_statement = "drop table if not exists{};".format(n)
         elif self.relationtype == "v":
             drop_statement = "drop view if exists {};".format(n)
         elif self.relationtype == "m":
@@ -432,7 +432,9 @@ class InspectedIndex(Inspected, TableRelated):
 
     @property
     def create_statement(self):
-        return "{};".format(self.definition)
+        defn = self.definition.lower()
+        defn.replace("create index", "create index if not exists", 1)
+        return "{};".format(defn)
 
     def __eq__(self, other):
         """
@@ -839,14 +841,28 @@ class InspectedConstraint(Inspected, TableRelated):
 
     @property
     def drop_statement(self):
-        return "alter table {} drop constraint {};".format(
+        return "alter table {} drop constraint if not exists{};".format(
             self.quoted_full_table_name, self.quoted_name
         )
 
     @property
     def create_statement(self):
-        USING = "alter table {} add constraint {} {} using index {};"
-        NOT_USING = "alter table {} add constraint {} {};"
+        USING = """\
+DO $$
+BEGIN
+alter table {} add constraint {} {} using index {};
+EXCEPTION WHEN others THEN
+    RAISE NOTICE '% %', SQLERRM, SQLSTATE;
+END$$;
+"""
+        NOT_USING = """\
+DO $$
+BEGIN
+alter table {} add constraint {} {};
+EXCEPTION WHEN others THEN
+    RAISE NOTICE '% %', SQLERRM, SQLSTATE;
+END$$;
+"""
         if self.index:
             return USING.format(
                 self.quoted_full_table_name,
