@@ -198,11 +198,11 @@ class ColumnInfo(AutoRepr):
 
     @property
     def add_column_clause(self):
-        return "add column {}{}".format(self.creation_clause, self.collation_subclause)
+        return "add column if not exists {}{}".format(self.creation_clause, self.collation_subclause)
 
     @property
     def drop_column_clause(self):
-        return "drop column {k}".format(k=self.quoted_name)
+        return "drop column if exists {k}".format(k=self.quoted_name)
 
     @property
     def alter_not_null_clause(self):

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "schemainspect_idempotent"
-version = "0.2"
+version = "0.6"
 authors = [ "Andrew Huang <k.andrew.huang@gmail.com>",]
 license = "Unlicense"
 readme = "README.md"

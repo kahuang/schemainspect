@@ -131,7 +131,7 @@ class InspectedSelectable(BaseInspectedSelectable):
     def drop_statement(self):
         n = self.quoted_full_name
         if self.relationtype in ("r", "p"):
-            drop_statement = "drop table if not exists{};".format(n)
+            drop_statement = "drop table if exists {};".format(n)
         elif self.relationtype == "v":
             drop_statement = "drop view if exists {};".format(n)
         elif self.relationtype == "m":
@@ -433,7 +433,10 @@ class InspectedIndex(Inspected, TableRelated):
     @property
     def create_statement(self):
         defn = self.definition.lower()
-        defn.replace("create index", "create index if not exists", 1)
+        defn = defn.replace("create index", "create index if not exists", 1)
+        defn = defn.replace("create unique index", "create unique index if not exists", 1)
+        defn = defn.replace("create index concurrently", "create index concurrently if not exists", 1)
+        defn = defn.replace("create unique index concurrently", "create unique index concurrently if not exists", 1)
         return "{};".format(defn)
 
     def __eq__(self, other):
@@ -841,7 +844,7 @@ class InspectedConstraint(Inspected, TableRelated):
 
     @property
     def drop_statement(self):
-        return "alter table {} drop constraint if not exists{};".format(
+        return "alter table {} drop constraint if exists {};".format(
             self.quoted_full_table_name, self.quoted_name
         )
 
